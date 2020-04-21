@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ImageScale Demo</title>
+    <style>
+        #form span{
+            width: 80px;
+            height: 40px;
+            border-radius: 5px;
+            background-color: #05a;
+            margin-left: 10px;
+            color: #eee;
+            display: inline-block;
+            text-align: center;
+            line-height: 40px;
+        }
+        #form span:hover{
+            background-color: #03a;
+            cursor: pointer;
+        }
+        .image-box{
+            width: 100%;
+            padding: 5%;
+        }
+        .image-box .images{
+            width: 30%;
+            display: inline-block;
+        }
+        .image-box .images img{
+            width: 90%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="select-box">
+            <form id="form">
+                <span id="select">选择</span>
+                <span id="reset">重置</span>
+                <span id="zoom">缩放</span>
+                <input type="file" id="file" hidden accept="image/jpeg,image/gif,image/jpg,image/png">
+            </form>
+        </div>
+        <div class="filename-box">
+            <span>未选择文件</span>
+            <span></span>
+        </div>
+        <div class="image-box"></div>
+    </div>
+</body>
+</html>
+<script src="ImageScale.js" type="application/javascript"></script>
+<script type="application/javascript">
+    //var scale = new ImageScale();
+    var imageBox = document.getElementsByClassName('image-box')[0];
+    var filenameBox= document.getElementsByClassName('filename-box')[0];
+    var spans = filenameBox.getElementsByTagName('span');
+    var select = document.getElementById('select');
+    var reset = document.getElementById('reset');
+    var form = document.getElementById('form');
+    var zoom = document.getElementById('zoom');
+    var fileInput = document.getElementById('file');
+    var nowSelect;
+    function addImage(url, name) {
+        var images = document.createElement('div');
+        var img = document.createElement('img');
+        images.setAttribute('class', 'images');
+        img.src = url;
+        img.alt = '预览图';
+        img.title = name||'未命名';
+        images.append(img);
+        imageBox.append(images);
+    }
+    reset.addEventListener('click', function () {
+        spans[0].innerText = '未选择文件';
+        spans[1].innerText = '';
+        form.reset();
+    });
+    select.addEventListener('click', function () {
+        fileInput.click();
+    });
+    zoom.addEventListener('click', function () {
+        if( nowSelect ){
+            var ratio = prompt('请输入缩放比例', '1');
+            ratio = parseFloat(ratio);
+            var quality = prompt('请输入图片质量', '0.95');
+            quality = parseFloat(quality);
+            nowSelect.setQuality(quality).setRatio(ratio).toJpeg().useNewFileName().resize().then(function (zoomed) {
+                console.log(zoomed.getFile());
+                window.open(zoomed.getObjectURL());
+            });
+        }else{
+            alert('还没有实例化缩放对象');
+        }
+    });
+    fileInput.addEventListener('change', function () {
+        if( this.files[0] ){
+            nowSelect = new ImageScale(this.files[0]);
+            spans[0].innerText = '已选择文件:';
+            spans[1].innerText = nowSelect.getFilename();
+            addImage(nowSelect.getObjectURL(), nowSelect.getFilename());
+        }else{
+            spans[0].innerText = '未选择文件';
+            spans[1].innerText = '';
+        }
+    });
+</script>
